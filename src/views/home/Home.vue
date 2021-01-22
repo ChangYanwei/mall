@@ -7,7 +7,9 @@
     <scroll class="content"
             ref="scroll"
             :probe-type="3"
-            @scroll="contentScroll">
+            :pull-up-load="true"
+            @scroll="contentScroll"
+            @load-more="getMoreData">
       <home-swiper :banners="banners"/>
       <home-recommend :recommend-data="recommends"/>
       <home-popular-view/>
@@ -91,6 +93,10 @@
           this.isShowBackTop = false;
         }
       },
+      //上拉加载更多
+      getMoreData() {
+        this.getHomeGoodsData(this.currentType);
+      },
 
       //网络请求相关
       getHomeData() {
@@ -107,6 +113,7 @@
           this.goods[type].list.push(...res.data.list);
           this.goods[type].page += 1;
         })
+
       }
 
     }

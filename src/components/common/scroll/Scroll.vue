@@ -15,6 +15,10 @@
       probeType: {
         type: Number,
         default: 0
+      },
+      pullUpLoad: {
+        type:Boolean,
+        default: false
       }
     },
     data() {
@@ -25,12 +29,20 @@
     mounted() {
       this.scroll = new BScroll(this.$refs.wrapper, {
         click: true,
-        probeType: 3,
-        pullUpLoad: this.probeType
+        probeType: this.probeType,
+        pullUpLoad: this.pullUpLoad
       })
 
       this.scroll.on('scroll', position => {
         this.$emit('scroll',position)
+      })
+
+      this.scroll.on('pullingUp',() => {
+        this.$emit('load-more');
+
+        setTimeout(() => {
+          this.scroll.finishPullUp();
+        },2000)
       })
     },
     methods: {
