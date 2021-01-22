@@ -4,13 +4,18 @@
       <div slot="center">购物街</div>
     </nav-bar>
 
-    <scroll class="content">
+    <scroll class="content"
+            ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll">
       <home-swiper :banners="banners"/>
       <home-recommend :recommend-data="recommends"/>
       <home-popular-view/>
       <tab-control class="tab-control" :titles="['流行','新款','精选']" @tab-click="getType"/>
       <goods-list :goods="showGoods"></goods-list>
     </scroll>
+
+    <back-top @click.native="backClick" v-if="isShowBackTop"/>
   </div>
 </template>
 
@@ -23,10 +28,9 @@
   import TabControl from "components/content/tabControl/TabControl";
   import GoodsList from "components/content/goods/GoodsList";
   import Scroll from "components/common/scroll/Scroll";
+  import BackTop from "components/content/backTop/BackTop";
 
   import {getHomeMultiData, getHomeGoods} from 'network/home';
-
-  import BScroll from 'better-scroll'
 
   export default {
     name: "Home",
@@ -40,7 +44,8 @@
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []}
         },
-        currentType: 'pop'
+        currentType: 'pop',
+        isShowBackTop: false
       }
     },
     components: {
@@ -50,7 +55,8 @@
       NavBar,
       TabControl,
       GoodsList,
-      Scroll
+      Scroll,
+      BackTop
     },
     created() {
       //首页轮播图数据
@@ -72,6 +78,18 @@
       getType(typeIndex) {
         console.log(typeIndex);
         this.currentType = this.goodsType[typeIndex];
+      },
+      //返回顶部
+      backClick() {
+        this.$refs.scroll.scrollTo(0, 0, 500);
+      },
+      //返回顶部按钮的显示与隐藏
+      contentScroll(position) {
+        if (position.y < -1000) {
+          this.isShowBackTop = true;
+        } else {
+          this.isShowBackTop = false;
+        }
       },
 
       //网络请求相关
@@ -124,7 +142,7 @@
 
     position: absolute;
     top: 44px;
-    bottom:49px;
+    bottom: 49px;
     left: 0;
     right: 0;
   }
