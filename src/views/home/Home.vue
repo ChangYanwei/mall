@@ -7,7 +7,8 @@
     <home-swiper :banners="banners"/>
     <home-recommend :recommend-data="recommends"/>
     <home-popular-view/>
-    <tab-control class="tab-control" :titles="['流行','新款','精选']"/>
+    <tab-control class="tab-control" :titles="['流行','新款','精选']" @tab-click="getType"/>
+    <goods-list :goods="showGoods"></goods-list>
 
     <ul>
       <li>内容1</li>
@@ -71,6 +72,7 @@
 
   import NavBar from "components/common/navbar/NavBar";
   import TabControl from "components/content/tabControl/TabControl";
+  import GoodsList from "components/content/goods/GoodsList";
 
   import {getHomeMultiData, getHomeGoods} from 'network/home'
 
@@ -80,11 +82,13 @@
       return {
         banners: [],
         recommends: [],
+        goodsType:['pop','new','sell'],
         goods: {
           'pop': {page: 0, list: []},
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []}
-        }
+        },
+        currentType:'pop'
       }
     },
     components: {
@@ -92,7 +96,8 @@
       HomeRecommend,
       HomePopularView,
       NavBar,
-      TabControl
+      TabControl,
+      GoodsList
     },
     created() {
       //首页轮播图数据
@@ -102,7 +107,20 @@
       this.getHomeGoodsData('new');
       this.getHomeGoodsData('sell');
     },
+    computed: {
+      showGoods() {
+        return this.goods[this.currentType].list;
+      }
+    },
     methods: {
+
+      //事件监听相关
+      //获取点击的商品类型菜单
+      getType(typeIndex) {
+        console.log(typeIndex);
+        this.currentType = this.goodsType[typeIndex];
+      },
+
       //网络请求相关
       getHomeData() {
         getHomeMultiData().then(res => {
@@ -113,7 +131,7 @@
       getHomeGoodsData(type) {
         let tempPage = this.goods[type].page + 1;
         getHomeGoods(type, tempPage).then(res => {
-          console.log(type,'的商品数据', res);
+          console.log(type, '的商品数据', res);
           // this.goods[type].list = this.goods[type].list.concat(res.data.list)
           this.goods[type].list.push(...res.data.list);
           this.goods[type].page += 1;
