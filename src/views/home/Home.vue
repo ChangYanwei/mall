@@ -4,10 +4,10 @@
       <div slot="center">购物街</div>
     </nav-bar>
 
-    <home-swiper :banners="banners" />
-    <home-recommend :recommend-data="recommends" />
-    <home-popular-view />
-    <tab-control class="tab-control" :titles="['流行','新款','精选']" />
+    <home-swiper :banners="banners"/>
+    <home-recommend :recommend-data="recommends"/>
+    <home-popular-view/>
+    <tab-control class="tab-control" :titles="['流行','新款','精选']"/>
 
     <ul>
       <li>内容1</li>
@@ -72,14 +72,19 @@
   import NavBar from "components/common/navbar/NavBar";
   import TabControl from "components/content/tabControl/TabControl";
 
-  import {getHomeMultiData} from 'network/home'
+  import {getHomeMultiData, getHomeGoods} from 'network/home'
 
   export default {
     name: "Home",
     data() {
       return {
         banners: [],
-        recommends: []
+        recommends: [],
+        goods: {
+          'pop': {page: 0, list: []},
+          'new': {page: 0, list: []},
+          'sell': {page: 0, list: []}
+        }
       }
     },
     components: {
@@ -90,10 +95,12 @@
       TabControl
     },
     created() {
+      //首页轮播图数据
       this.getHomeData();
-    },
-    mounted() {
-
+      //首页商品数据
+      this.getHomeGoodsData('pop');
+      this.getHomeGoodsData('new');
+      this.getHomeGoodsData('sell');
     },
     methods: {
       //网络请求相关
@@ -102,13 +109,23 @@
           this.banners = res.data.banner.list;
           this.recommends = res.data.recommend.list;
         })
+      },
+      getHomeGoodsData(type) {
+        let tempPage = this.goods[type].page + 1;
+        getHomeGoods(type, tempPage).then(res => {
+          console.log(type,'的商品数据', res);
+          // this.goods[type].list = this.goods[type].list.concat(res.data.list)
+          this.goods[type].list.push(...res.data.list);
+          this.goods[type].page += 1;
+        })
       }
+
     }
   }
 </script>
 
 <style scoped>
-  .home{
+  .home {
     padding-top: 44px;
   }
 
@@ -122,7 +139,7 @@
     z-index: 9;
   }
 
-  .tab-control{
+  .tab-control {
     position: sticky;
     top: 44px;
   }
