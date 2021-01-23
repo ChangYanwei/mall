@@ -54,7 +54,8 @@
         currentType: 'pop',
         isShowBackTop: false,
         tabOffsetTop: 0,
-        isFixed:false
+        isFixed: false,
+        saveY: 0
       }
     },
     components: {
@@ -75,7 +76,14 @@
       this.getHomeGoodsData('pop');
       this.getHomeGoodsData('new');
       this.getHomeGoodsData('sell');
-
+    },
+    activated() {
+      this.$refs.scroll.refresh();
+      this.$refs.scroll.scrollTo(0,this.saveY,0)
+    },
+    deactivated() {
+      this.saveY = this.$refs.scroll.getPositionY();
+      console.log(this.saveY);
     },
     mounted() {
       //监听图片加载完成
@@ -116,7 +124,6 @@
 
         //2.决定tabControl是否吸顶
         this.isFixed = -position.y >= this.tabOffsetTop;
-
       },
 
       //上拉加载更多

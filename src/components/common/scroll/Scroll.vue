@@ -56,6 +56,9 @@
       },
       refresh() {
         this.scroll && this.scroll.refresh();
+      },
+      getPositionY() {
+        return this.scroll ? this.scroll.y : 0;
       }
     }
   }
