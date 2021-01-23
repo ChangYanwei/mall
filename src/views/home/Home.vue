@@ -4,16 +4,20 @@
       <div slot="center">购物街</div>
     </nav-bar>
 
+    <tab-control class="tab-control" :titles="['流行','新款','精选']"
+                 @tab-click="getType" v-show="isFixed" ref="tabControl1"/>
+
     <scroll class="content"
             ref="scroll"
             :probe-type="3"
             :pull-up-load="true"
             @scroll="contentScroll"
             @load-more="getMoreData">
-      <home-swiper :banners="banners"/>
+      <home-swiper :banners="banners" @swiper-load="swiperImgLoad"/>
       <home-recommend :recommend-data="recommends"/>
       <home-popular-view/>
-      <tab-control class="tab-control" :titles="['流行','新款','精选']" @tab-click="getType"/>
+      <tab-control :titles="['流行','新款','精选']"
+                   @tab-click="getType" ref="tabControl2"/>
       <goods-list :goods="showGoods"></goods-list>
     </scroll>
 
@@ -33,6 +37,7 @@
   import BackTop from "components/content/backTop/BackTop";
 
   import {getHomeMultiData, getHomeGoods} from 'network/home';
+  import {debounce} from "common/js/utils";
 
   export default {
     name: "Home",
@@ -47,7 +52,9 @@
           'sell': {page: 0, list: []}
         },
         currentType: 'pop',
-        isShowBackTop: false
+        isShowBackTop: false,
+        tabOffsetTop: 0,
+        isFixed:false
       }
     },
     components: {
@@ -72,9 +79,7 @@
     },
     mounted() {
       //监听图片加载完成
-
-      const refresh = this.debounce(this.$refs.scroll.refresh, 300)
-
+      const refresh = debounce(this.$refs.scroll.refresh, 300)
       this.$bus.$on('imgLoad', () => {
         // this.$refs.scroll.refresh();
         refresh();
@@ -87,38 +92,44 @@
     },
     methods: {
 
-      //生成防抖函数
-      debounce(func, delay) {
-        let timer = null;
-        return function (...args) {
-          if (timer) clearTimeout(timer);
-          timer = setTimeout(() => {
-            func.apply(this, args)
-          }, delay)
-        }
-      },
-
       //事件监听相关
       //获取点击的商品类型菜单
       getType(typeIndex) {
-        console.log(typeIndex);
         this.currentType = this.goodsType[typeIndex];
+        this.$refs.tabControl1.currentIndex = typeIndex;
+        this.$refs.tabControl2.currentIndex = typeIndex;
       },
+
       //返回顶部
       backClick() {
         this.$refs.scroll.scrollTo(0, 0, 500);
       },
-      //返回顶部按钮的显示与隐藏
+
+      //监听滚动
       contentScroll(position) {
+        //1.返回顶部按钮的显示与隐藏
         if (position.y < -1000) {
           this.isShowBackTop = true;
         } else {
           this.isShowBackTop = false;
         }
+
+        //2.决定tabControl是否吸顶
+        this.isFixed = -position.y >= this.tabOffsetTop;
+
       },
+
       //上拉加载更多
       getMoreData() {
         this.getHomeGoodsData(this.currentType);
+      },
+
+      //监听轮播图加载完成
+      swiperImgLoad() {
+        //获取tabControl的offsetTop
+        //所有的组件都有是个属性，$el，用来获取组件中的根元素
+
+        this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
       },
 
       //网络请求相关
@@ -153,20 +164,14 @@
   .home-nav {
     background-color: var(--color-tint);
     color: white;
-    position: fixed;
-    left: 0;
-    top: 0;
-    right: 0;
+    /*position: fixed;*/
+    /*left: 0;*/
+    /*top: 0;*/
+    /*right: 0;*/
     z-index: 9;
   }
 
-  .tab-control {
-    position: sticky;
-    top: 44px;
-  }
-
   .content {
-    /*height: 300px;*/
     overflow: hidden;
     background-color: white;
 
@@ -177,10 +182,16 @@
     right: 0;
   }
 
-  /*.content {*/
-  /*  height: calc(100% - 93px);*/
-  /*  overflow: hidden;*/
-  /*  margin-top: 44px;*/
+  .tab-control {
+    position: relative;
+    z-index: 99;
+  }
+
+  /*.fixed {*/
+  /*  position: sticky;*/
+  /*  top: 44px;*/
+  /*  left: 0;*/
+  /*  right: 0;*/
   /*}*/
 
 </style>

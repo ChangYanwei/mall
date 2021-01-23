@@ -33,24 +33,28 @@
         pullUpLoad: this.pullUpLoad
       })
 
+      //监听滚动的位置
       this.scroll.on('scroll', position => {
         this.$emit('scroll',position)
       })
 
-      this.scroll.on('pullingUp',() => {
-        this.$emit('load-more');
+      //监听滚动到底部
+      if (this.pullUpLoad) {
+        this.scroll.on('pullingUp',() => {
+          this.$emit('load-more');
 
-        setTimeout(() => {
-          this.scroll.finishPullUp();
-        },2000)
-      })
+          setTimeout(() => {
+            this.scroll.finishPullUp();
+          },2000)
+        })
+      }
+
     },
     methods: {
       scrollTo(x, y, time = 300) {
         this.scroll && this.scroll.scrollTo(x, y, time);
       },
       refresh() {
-        console.log('----');
         this.scroll && this.scroll.refresh();
       }
     }
