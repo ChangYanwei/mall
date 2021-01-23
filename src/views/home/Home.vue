@@ -63,10 +63,22 @@
     created() {
       //首页轮播图数据
       this.getHomeData();
+
       //首页商品数据
       this.getHomeGoodsData('pop');
       this.getHomeGoodsData('new');
       this.getHomeGoodsData('sell');
+
+    },
+    mounted() {
+      //监听图片加载完成
+
+      const refresh = this.debounce(this.$refs.scroll.refresh, 300)
+
+      this.$bus.$on('imgLoad', () => {
+        // this.$refs.scroll.refresh();
+        refresh();
+      })
     },
     computed: {
       showGoods() {
@@ -74,6 +86,17 @@
       }
     },
     methods: {
+
+      //生成防抖函数
+      debounce(func, delay) {
+        let timer = null;
+        return function (...args) {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => {
+            func.apply(this, args)
+          }, delay)
+        }
+      },
 
       //事件监听相关
       //获取点击的商品类型菜单
