@@ -83,7 +83,6 @@
     },
     deactivated() {
       this.saveY = this.$refs.scroll.getPositionY();
-      console.log(this.saveY);
     },
     mounted() {
       //监听图片加载完成
