@@ -55,7 +55,8 @@
         isShowBackTop: false,
         tabOffsetTop: 0,
         isFixed: false,
-        saveY: 0
+        saveY: 0,
+        itemImgListener: null
       }
     },
     components: {
@@ -82,15 +83,20 @@
       this.$refs.scroll.scrollTo(0,this.saveY,0)
     },
     deactivated() {
+      //保存当前的纵坐标值
       this.saveY = this.$refs.scroll.getPositionY();
+
+      //取消对事件总线上的imgLoad的监听
+      this.$bus.$off('imgLoad',this.itemImgListener)
     },
     mounted() {
       //监听图片加载完成
       const refresh = debounce(this.$refs.scroll.refresh, 300)
-      this.$bus.$on('imgLoad', () => {
-        // this.$refs.scroll.refresh();
+
+      this.itemImgListener = () => {
         refresh();
-      })
+      };
+      this.$bus.$on('imgLoad', this.itemImgListener)
     },
     computed: {
       showGoods() {
